@@ -1,0 +1,9 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "rough-base-1d07",
+  "main": "src/index.js",
+  "compatibility_date": "2025-03-03",
+  "observability": {
+      "enabled": true
+  }
+}
