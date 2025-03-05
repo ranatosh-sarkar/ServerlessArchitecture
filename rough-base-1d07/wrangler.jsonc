@@ -5,5 +5,8 @@
   "compatibility_date": "2025-03-03",
   "observability": {
       "enabled": true
-  }
+  },
+  "kv_namespaces": [
+    { "binding": "TEST_RESULTS_citiAutomation", "id": "b8d8452c67b241979aa93067aae52bee" }
+  ]
 }

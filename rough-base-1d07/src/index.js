@@ -1,40 +1,24 @@
 export default {
   async fetch(request, env) {
-    const url = new URL(request.url);
+    try {
+      // Retrieve the latest test run from Cloudflare KV
+      const storedResults = await env.TEST_RESULTS_citiAutomation.get("latest-run");
 
-    if (url.pathname === "/run-tests") {
-      return new Response(await triggerGitHubActions(env), {
-        headers: { "Content-Type": "text/plain" },
+      // Check if data exists
+      if (storedResults) {
+        return new Response(storedResults, { 
+          headers: { "Content-Type": "application/json" } 
+        });
+      } else {
+        return new Response(JSON.stringify({ message: "No test results found in KV Store" }), { 
+          headers: { "Content-Type": "application/json" } 
+        });
+      }
+    } catch (error) {
+      return new Response(JSON.stringify({ error: "Worker execution failed", details: error.message }), { 
+        status: 500, 
+        headers: { "Content-Type": "application/json" } 
       });
     }
-
-    return new Response("Cloudflare Worker is ready!", { status: 200 });
-  },
-};
-
-async function triggerGitHubActions(env) {
-  const owner = "ranatosh-sarkar";
-  const repo = "ServerlessArchitecture";          // e.g., "ServerlessArchitecture"
-  const workflowFileName = "playwright.yml";      // The name of your workflow file
-  const branch = "master";                        // or "main", whichever you use
-
-  const url = `https://api.github.com/repos/${owner}/${repo}/actions/workflows/${workflowFileName}/dispatches`;
-
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Accept": "application/vnd.github.v3+json",
-      "Authorization": `Bearer ${env.GITHUB_TOKEN}`, // The secret we stored
-      "Content-Type": "application/json",
-      "User-Agent": "CloudflareWorker-GitHubActions"
-    },
-    body: JSON.stringify({ ref: branch })  // 'ref' is the branch to run
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Failed to trigger GitHub Actions: ${errorText}`);
   }
-
-  return "Successfully triggered GitHub Actions workflow!";
-}
+};
